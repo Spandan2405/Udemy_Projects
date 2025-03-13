@@ -95,17 +95,6 @@
       "points": 30
     },
     {
-      "question": "Which of the following best describes the difference between <section> and <article> in HTML5?",
-      "options": [
-        "<section> is for generic grouping of content, while <article> represents self-contained content.",
-        "<article> is used only for blog posts, while <section> can contain any content.",
-        "<section> is obsolete in HTML5 and should be replaced with <div>.",
-        "There is no difference; both are interchangeable."
-      ],
-      "correctOption": 0,
-      "points": 30
-    },
-    {
       "question": "Which HTML5 API allows a web page to store data in a key-value format that persists even after the browser is closed?",
       "options": ["Cookies", "Session Storage", "Local Storage", "IndexedDB"],
       "correctOption": 2,
@@ -156,17 +145,6 @@
       "points": 20
     },
     {
-      "question": "Which CSS property allows you to set multiple background images?",
-      "options": [
-        "background-image",
-        "background-repeat",
-        "background",
-        "background-blend-mode"
-      ],
-      "correctOption": 2,
-      "points": 20
-    },
-    {
       "question": "What does the 'grid-template-areas' property define?",
       "options": [
         "The number of columns and rows in a grid",
@@ -203,17 +181,6 @@
       "question": "Which of the following CSS properties is used to apply 3D transformations?",
       "options": ["transform", "perspective", "rotate3d", "all of the above"],
       "correctOption": 3,
-      "points": 30
-    },
-    {
-      "question": "Which pseudo-class selects an element only if it is the first child of its parent?",
-      "options": [
-        ":first-child",
-        ":nth-child(1)",
-        ":first-of-type",
-        ":only-child"
-      ],
-      "correctOption": 0,
       "points": 30
     },
     {
