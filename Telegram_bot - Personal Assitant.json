@@ -1,0 +1,684 @@
+{
+  "name": "Telegram bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": "={{ true }}",
+          "imageSize": "large"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        -400
+      ],
+      "id": "95cb17ac-36f8-46b2-8cb0-0dce78b07f1c",
+      "name": "Telegram Trigger",
+      "webhookId": "0e5d9903-21e2-4164-9d3b-cbf4b86cf870",
+      "credentials": {
+        "telegramApi": {
+          "id": "wHin71FD3ozxTRFr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c446b4b2-fe7b-4740-adf2-dbd2ff6748c6",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.photo ? 1 : 0 }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PhotoInput"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1064f20c-c49b-4455-a4cb-537c418e80da",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.text ? 1 : 0 }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TextInput"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b2e0fceb-9216-4fe3-b942-690e1a09fa8c",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.document ? 1 : 0 }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "FileInput"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        840,
+        -400
+      ],
+      "id": "814be6fd-e6ee-40bc-b349-7c80749f3b75",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{(() => {\n    const msg = $('Telegram Trigger').item.json.message;\n    return msg.photo?.slice(-1)[0]?.file_id\n || msg.document?.file_id || 'NO_FILE_FOUND';\n  })()}}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        -680
+      ],
+      "id": "2cd1869d-ac0e-4f8a-b5f4-9acc5528e5c9",
+      "name": "Get Image",
+      "webhookId": "6cb079e8-e0b6-493b-a2e4-ada27d2db4b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "wHin71FD3ozxTRFr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{(() => $json.Imageprompt || $json.Textprompt || \"No prompt provided\")()}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        3020,
+        -400
+      ],
+      "id": "721b7277-5f09-458e-8a5e-0bd34f1c7ac2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "description": "This tool interprets the text messages/ prompt and give appropriate and detailed responses"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        3240,
+        -600
+      ],
+      "id": "5bc46bfc-0d35-4200-8ec4-a49112c477aa",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "Describe the image/file in detail",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1980,
+        -460
+      ],
+      "id": "b3e9347d-3d8b-45a4-b09d-d5e4594b0c39",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "GpjhcGLr4aFcQWco",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2980,
+        -620
+      ],
+      "id": "08559b68-5036-4d5c-8b4f-975503514d1d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GpjhcGLr4aFcQWco",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b8440fd-869c-4856-aa1b-ed6077da16a3",
+              "name": "=Imageprompt",
+              "value": "=You're a smart, visual assistant. Analyze the input below and explain it clearly and briefly.\n\n📄 OCR Text:\n\"{{ $json.ParsedResults[0].ParsedText }}\"\n\n🖼️ Image Description:\n\"{{ $json.content }}\"\n\nRespond in the following format:\n- Use **max 5 bullet points**\n- **Keep total response under 200 words**\n- Be concise for simple inputs, and descriptive if needed\n- Use **emojis** where appropriate to add clarity or tone\n- Focus on what the content represents, its possible use, and any important insight or hidden meaning\n\nAvoid long paragraphs. Your goal is to inform quickly and helpfully like you're explaining to a student or a beginner.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2500,
+        -460
+      ],
+      "id": "53536ec4-f694-4424-8100-d484e3e95f81",
+      "name": "Image Prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "44899534-9fd2-48f6-81a3-a368c7b9d26a",
+              "name": "=Textprompt",
+              "value": "=  \"{{ $('Telegram Trigger').item.json.message.text }}\" ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1980,
+        20
+      ],
+      "id": "39552dee-379f-4efc-ac5d-ed44c675a50d",
+      "name": "Text Prompt"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        3100,
+        -600
+      ],
+      "id": "0ac726a6-d43f-4914-9182-bcbca5cc7213",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1980,
+        -260
+      ],
+      "id": "768797e5-59cd-49fe-b2b7-2d8d4e5f93bb",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "GpjhcGLr4aFcQWco",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2780,
+        -100
+      ],
+      "id": "d3f3cad4-22b3-40fe-a408-da37b35a6503",
+      "name": "Send Image Generated",
+      "webhookId": "f27e938e-78d6-4d4b-a3eb-2bb8c8d1d3fa",
+      "credentials": {
+        "telegramApi": {
+          "id": "wHin71FD3ozxTRFr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3480,
+        -400
+      ],
+      "id": "bce0f4ba-384c-4c58-9a9c-0b1c1e85b2a4",
+      "name": "Output Msg",
+      "webhookId": "ad8089bd-af50-4edd-bcea-201b0111f5b4",
+      "credentials": {
+        "telegramApi": {
+          "id": "wHin71FD3ozxTRFr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Please attach the prompt along with the command 🙏🏼",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1400,
+        -300
+      ],
+      "id": "6d28ae0b-fbb7-493d-a6d0-734b2a21cd9d",
+      "name": "Error Msg",
+      "webhookId": "e30f8f17-769e-4fc8-bd1f-520516a50f94",
+      "credentials": {
+        "telegramApi": {
+          "id": "wHin71FD3ozxTRFr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.ocr.space/parse/imageurl",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "K83444298288957"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2180,
+        -680
+      ],
+      "id": "fa446b05-6737-4b24-be54-81f616489195",
+      "name": "Extract content"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{(() => {   const text = $json.message?.text?.toLowerCase() || \"\";    return text === \"/imagegen\"     ? \"command\"     : (text.includes(\"generate image\") || text.includes(\"generate an image\") || text.includes(\"image generation\")) || text.includes(\"/imagegen\")    ? \"text\"     : \"other\"; })()}}",
+                    "rightValue": "=command",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a1912217-fef0-48de-9baf-f237de906deb"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Error"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a434d6a0-8700-47a3-83cf-be9b534246eb",
+                    "leftValue": "={{(() => {   const text = $json.message?.text?.toLowerCase() || \"\";    return text === \"/imagegen\"     ? \"command\"     : (text.includes(\"generate image\") || text.includes(\"generate an image\") || text.includes(\"image generation\")) || text.includes(\"/imagegen\")    ? \"text\"     : \"other\"; })()}}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Generate Image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b80b863c-5f60-49d9-a86d-8fe2a3aa92f8",
+                    "leftValue": "={{(() => {   const text = $json.message?.text?.toLowerCase() || \"\";    return text === \"/imagegen\"     ? \"command\"     : (text.includes(\"generate image\") || text.includes(\"generate an image\") || text.includes(\"image generation\")) || text.includes(\"/imagegen\")    ? \"text\"     : \"other\"; })()}}",
+                    "rightValue": "other",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text Prompt"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1220,
+        -40
+      ],
+      "id": "e28faf59-5f16-4180-8804-e6aeabd53d75",
+      "name": "Switch1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image": {
+      "main": [
+        [
+          {
+            "node": "Extract content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Output Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Send Image Generated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract content": {
+      "main": [
+        [
+          {
+            "node": "Image Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Error Msg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eabbbb7f-4f88-4605-bf13-739d5cabb424",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "425ad236685ce5f074bbc43712dc135ec5a6c8bd0a43ff0e178bea9f322ac0c2"
+  },
+  "id": "0LXmVMnzttYCAgN4",
+  "tags": []
+}
